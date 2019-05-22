@@ -1,5 +1,17 @@
 <template>
   <div class="py-3 px-3">
+    <div class="row" v-if="tiquet">
+      <div class="col-12 mb-2 d-flex justify-content-center">
+        <div class="card" style="width: 18rem;">
+          <h1 class="border-bottom text-center">TIQUET</h1>
+          <div class="card-body text-center">
+            <h3 class="card-title">{{tiquet.StoreName}}</h3>
+            <p v-if="tiquet.turn.type='normal'" class="m-0">A{{tiquet.turn.number}}</p>
+            <p v-else class="m-0">A{{tiquet.turn.created_at}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <template v-for="store in stores">
       <!--div :key="store.name" class="store-app my-3 mx-4">
         <img
@@ -56,22 +68,23 @@
                     id="appt-time"
                     type="time"
                     name="appt-time"
-                    min="12:00"
-                    max="18:00"
+                    min="8:00"
+                    max="23:00"
                     required
+                    v-model="time"
                     pattern="[0-9]{2}:[0-9]{2}"
                   >
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  <button type="button" class="btn btn-primary">Reserva</button>
+                  <button type="button" class="btn btn-primary" @click="hourTurn(store)">Reserva</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="col-6 mt-2">
-          <button class="btn btn-primary">Turn Ahora</button>
+          <button class="btn btn-primary" @click="normalTurn(store)">Turn Ahora</button>
         </div>
         <div class="col-12">
           <hr>
@@ -99,7 +112,9 @@ export default {
       stores: [],
       urls: urls,
       showTurnsModal: false,
-      storeModal: {}
+      storeModal: {},
+      time: null,
+      tiquet: null
     };
   },
 
@@ -109,6 +124,7 @@ export default {
       .get(url)
       .then(res => {
         this.stores = res.data;
+        console.log(this.stores);
       })
       .catch(err => {
         console.log(err);
@@ -129,23 +145,67 @@ export default {
         urls.routes.store +
         "/" +
         store.id +
-        "/turn";
+        urls.routes.turn;
 
       axios
         .post(url)
         .then(res => {
+          this.tiquet = res.data;
+          this.tiquet.StoreName = store.name;
+          console.log(this.tiquet);
           this.$swal({
             type: "success",
-            title: "Turn demanat A" + res.data.number,
+            title: "Turn demanat A" + res.data.turn.number,
             showConfirmButton: false,
             timer: 2000
           });
-          console.log("Torn demanat A" + res.data.number);
+          console.log("Torn demanat A" + res.data.turn.number);
           //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
         })
         .catch(err => {
           this.$swal("Failako");
         });
+    },
+    hourTurn(store) {
+      const url =
+        urls.host +
+        urls.routes.prefix +
+        urls.routes.store +
+        "/" +
+        store.id +
+        urls.routes.hourTurn;
+      if (this.time) {
+        var hoursMinutes = this.time.split(":");
+
+        var date = new Date();
+        date.setHours(hoursMinutes[0]);
+        date.setMinutes(hoursMinutes[1]);
+        console.log(date);
+        console.log(parseInt(date.getTime() / 1000));
+
+        axios
+          .post(url, {
+            hour: parseInt(date.getTime() / 1000)
+          })
+          .then(res => {
+            this.tiquet = res.data;
+            this.tiquet.StoreName = store.name;
+            console.log(this.tiquet);
+            this.$swal({
+              type: "success",
+              title: "Turn demanat A" + res.data.turn.number,
+              showConfirmButton: false,
+              timer: 2000
+            });
+            console.log("Torn demanat A" + res.data.turn.number);
+            //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
+          })
+          .catch(err => {
+            this.$swal("Failako");
+          });
+      } else {
+        this.$swal("selecciona l'hora");
+      }
     }
   }
 };

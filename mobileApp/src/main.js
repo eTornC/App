@@ -9,6 +9,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 Vue.config.productionTip = false;
 Vue.use(VueSweetAlert);
 
+window.id_user = 1;
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

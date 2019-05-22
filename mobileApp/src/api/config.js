@@ -23,7 +23,9 @@ export default {
        prefix:'',
        stores: '/stores',
        store: '/store',
-   
-       config: '/config'
+       config: '/config',
+       turn:'/turn',
+       hourTurn:'/hourTurn'
+
      },
    }
