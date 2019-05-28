@@ -2,7 +2,7 @@
   <div class="py-3 px-3">
 
     <div id="token-indicator">
-      <span v-if="hasToken">✅</span>
+      <span v-if="hasToken" @click="showToken">✅</span>
       <span v-else>❌</span>
     </div>
 
@@ -126,7 +126,7 @@ export default {
 
   computed: {
     hasToken() {
-      return typeof this.$route.query.token !== 'undefined';
+      return typeof this.$route.query.token !== 'undefined' && this.$route.query.token !== '';
     }
   },
 
@@ -219,6 +219,9 @@ export default {
       } else {
         this.$swal("selecciona l'hora");
       }
+    },
+    showToken() {
+      this.$swal(this.$route.query.token)
     }
   }
 };
