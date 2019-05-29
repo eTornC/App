@@ -1,5 +1,11 @@
 <template>
   <div class="py-3 px-3">
+
+    <div id="token-indicator">
+      <span v-if="hasToken" @click="showToken">✅</span>
+      <span v-else>❌</span>
+    </div>
+
     <div class="row" v-if="tiquet">
       <div class="col-12 mb-2 d-flex justify-content-center">
         <div class="card" style="width: 18rem;">
@@ -118,6 +124,12 @@ export default {
     };
   },
 
+  computed: {
+    hasToken() {
+      return typeof this.$route.query.token !== 'undefined' && this.$route.query.token !== '';
+    }
+  },
+
   mounted() {
     const url = urls.host + urls.routes.prefix + urls.routes.stores;
     axios
@@ -185,7 +197,8 @@ export default {
 
         axios
           .post(url, {
-            hour: parseInt(date.getTime() / 1000)
+            hour: parseInt(date.getTime() / 1000),
+            token: (this.hasToken ? this.$route.query.token : '')
           })
           .then(res => {
             this.tiquet = res.data;
@@ -206,6 +219,9 @@ export default {
       } else {
         this.$swal("selecciona l'hora");
       }
+    },
+    showToken() {
+      this.$swal(this.$route.query.token)
     }
   }
 };
@@ -222,5 +238,11 @@ hr {
   margin-bottom: 1rem;
   border: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#token-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 </style>
