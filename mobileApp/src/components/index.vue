@@ -12,7 +12,7 @@
           <h1 class="border-bottom text-center">TIQUET</h1>
           <div class="card-body text-center">
             <h3 class="card-title">{{tiquet.StoreName}}</h3>
-            <p v-if="tiquet.turn.type='normal'" class="m-0">A{{tiquet.turn.number}}</p>
+            <p v-if="tiquet.turn.type='normal'" class="m-0">T{{tiquet.turn.number}}</p>
             <p v-else class="m-0">T{{tiquet.turn.created_at}}</p>
           </div>
         </div>
@@ -167,11 +167,11 @@ export default {
           console.log(this.tiquet);
           this.$swal({
             type: "success",
-            title: "Turn demanat A" + res.data.turn.number,
+            title: "Turn demanat T" + res.data.turn.number,
             showConfirmButton: false,
             timer: 2000
           });
-          console.log("Torn demanat A" + res.data.turn.number);
+          console.log("Torn demanat T" + res.data.turn.number);
           //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
         })
         .catch(err => {
