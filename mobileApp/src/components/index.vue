@@ -13,7 +13,7 @@
           <div class="card-body text-center">
             <h3 class="card-title">{{tiquet.StoreName}}</h3>
             <p v-if="tiquet.turn.type='normal'" class="m-0">A{{tiquet.turn.number}}</p>
-            <p v-else class="m-0">A{{tiquet.turn.created_at}}</p>
+            <p v-else class="m-0">T{{tiquet.turn.created_at}}</p>
           </div>
         </div>
       </div>
