@@ -160,7 +160,9 @@ export default {
         urls.routes.turn;
 
       axios
-        .post(url)
+        .post(url,{
+            token: (this.hasToken ? this.$route.query.token : '')
+        })
         .then(res => {
           this.tiquet = res.data;
           this.tiquet.StoreName = store.name;
