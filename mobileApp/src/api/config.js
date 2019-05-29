@@ -25,6 +25,7 @@ export default {
        store: '/store',
        config: '/config',
        turn:'/turn',
+       vipTurn:'/vipTurn',
        hourTurn:'/hourTurn',
        bucketsNextHour:'/bucketsNextHour'
 

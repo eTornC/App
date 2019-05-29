@@ -5,6 +5,10 @@
       <span v-else>❌</span>
     </div>
 
+    <div>
+      <span>VIP</span>
+      <input type="checkbox" v-model="vip" name="isVip" id="">
+    </div>
     <div class="row" v-if="tiquet">
       <div class="col-12 mb-2 d-flex justify-content-center">
         <div class="card" style="width: 18rem;">
@@ -44,7 +48,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 mt-2">
+        <div class="col-4 mt-2">
           <button
             type="button"
             class="btn btn-warning"
@@ -71,15 +75,19 @@
                 </div>
                 <div class="modal-body">
                   <ul class="list-group">
-                    <li
-                      :class="{ bucketSelect: bucket ==  bucketsSelect}"
-                      class="list-group-item m-0"
-                      v-for="(bucket,index) in bucketsList"
-                      :key="index"
-                    >
-                      <div v-if="bucket.filled">{{hour(bucket.hour_start)}} ple</div>
-                      <div v-else @click="selectBucket(bucket)">{{hour(bucket.hour_start)}}</div>
-                    </li>
+                    <div v-for="(bucket,index) in bucketsList" :key="index">
+                      <li
+                        :class="{ bucketSelect: bucket ==  bucketsSelect}"
+                        class="list-group-item m-0 list-group-item-secondary"
+                        v-if="bucket.filled"
+                      >{{hour(bucket.hour_start)}}</li>
+                      <li
+                        :class="{ bucketSelect: bucket ==  bucketsSelect}"
+                        class="list-group-item m-0"
+                        v-else
+                        @click="selectBucket(bucket)"
+                      >{{hour(bucket.hour_start)}}</li>
+                    </div>
                   </ul>
                 </div>
                 <div class="modal-footer">
@@ -96,9 +104,12 @@
           </div>
           <!-- Modal End -->
 
-          <buckets-list/>
         </div>
-        <div class="col-6 mt-2">
+        <div class="col-4 mt-2">
+
+          <button v-if="vip" class="btn btn-success" @click="vipTurn(store)">Turn Vip</button>
+        </div>
+        <div class="col-4 mt-2">
           <button class="btn btn-primary" @click="normalTurn(store)">Turn Ahora</button>
         </div>
         <div class="col-12">
@@ -132,7 +143,8 @@ export default {
       storeModal: {},
       tiquet: null,
       bucketsList: null,
-      bucketsSelect: null
+      bucketsSelect: null,
+      vip:false
     };
   },
 
@@ -204,19 +216,49 @@ export default {
             token: this.hasToken ? this.$route.query.token : ""
           })
           .then(res => {
-            this.tiquet = res.data;
-            this.tiquet.StoreName = store.name;
             console.log(this.tiquet);
             this.$swal({
               type: "success",
               title: "Turn demanat T" + res.data.turn.number,
               showConfirmButton: false,
-              timer: 2000
+              timer: 1500
             });
             console.log("Torn demanat T" + res.data.turn.number);
             //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
           })
           .catch(err => {
+            this.$swal("Failako");
+          });
+      } else {
+        this.$swal("Failako Token");
+      }
+    },
+    vipTurn(store) {
+      const url =
+        urls.host +
+        urls.routes.prefix +
+        urls.routes.store +
+        "/" +
+        store.id +
+        urls.routes.vipTurn;
+        console.log(url)
+      if (this.hasToken) {
+        axios
+          .post(url, {
+            token: this.hasToken ? this.$route.query.token : ""
+          })
+          .then(res => {
+              this.$swal({
+              type: "success",
+              title: "Turn demanat V" + res.data.turn.number,
+              showConfirmButton: false,
+              timer: 1500
+            });
+            console.log("Torn demanat V" + res.data.turn.number);
+            //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
+          })
+          .catch(err => {
+            console.log(err)
             this.$swal("Failako");
           });
       } else {
@@ -277,7 +319,7 @@ $(function() {
 });
 </script>
 
-<style>
+<style scoped>
 hr {
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -293,5 +335,8 @@ hr {
 
 .bucketSelect {
   border: solid 3px rgb(52, 132, 236);
+}
+li{
+  box-sizing: border-box;
 }
 </style>
