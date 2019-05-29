@@ -77,7 +77,7 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  <button type="button" class="btn btn-primary" @click="hourTurn(store)">Reserva</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal" @click="hourTurn(store)">Reserva</button>
                 </div>
               </div>
             </div>
