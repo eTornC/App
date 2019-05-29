@@ -1,6 +1,5 @@
 <template>
   <div class="py-3 px-3">
-
     <div id="token-indicator">
       <span v-if="hasToken" @click="showToken">✅</span>
       <span v-else>❌</span>
@@ -51,6 +50,7 @@
             class="btn btn-warning"
             data-toggle="modal"
             data-target="#exampleModal"
+            @click="getNextBuckets(store)"
           >Reserva</button>
           <!-- Modal -->
           <div
@@ -70,24 +70,33 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <input
-                    id="appt-time"
-                    type="time"
-                    name="appt-time"
-                    min="8:00"
-                    max="23:00"
-                    required
-                    v-model="time"
-                    pattern="[0-9]{2}:[0-9]{2}"
-                  >
+                  <ul class="list-group">
+                    <li
+                      :class="{ bucketSelect: bucket ==  bucketsSelect}"
+                      class="list-group-item m-0"
+                      v-for="(bucket,index) in bucketsList"
+                      :key="index"
+                    >
+                      <div v-if="bucket.filled">{{hour(bucket.hour_start)}} ple</div>
+                      <div v-else @click="selectBucket(bucket)">{{hour(bucket.hour_start)}}</div>
+                    </li>
+                  </ul>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  <button type="button" class="btn btn-primary" data-dismiss="modal" @click="hourTurn(store)">Reserva</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-dismiss="modal"
+                    @click="hourTurn(store)"
+                  >Reserva</button>
                 </div>
               </div>
             </div>
           </div>
+          <!-- Modal End -->
+
+          <buckets-list/>
         </div>
         <div class="col-6 mt-2">
           <button class="btn btn-primary" @click="normalTurn(store)">Turn Ahora</button>
@@ -110,23 +119,29 @@ import datePicker from "vue-bootstrap-datetimepicker";
 import "bootstrap/dist/css/bootstrap.css";
 import "pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css";
 Vue.use(datePicker);
-
+import bucketsList from "./bucketsList.vue";
 export default {
-  components: {},
+  components: {
+    "buckets-list": bucketsList
+  },
   data() {
     return {
       stores: [],
       urls: urls,
       showTurnsModal: false,
       storeModal: {},
-      time: null,
-      tiquet: null
+      tiquet: null,
+      bucketsList: null,
+      bucketsSelect: null
     };
   },
 
   computed: {
     hasToken() {
-      return typeof this.$route.query.token !== 'undefined' && this.$route.query.token !== '';
+      return (
+        typeof this.$route.query.token !== "undefined" &&
+        this.$route.query.token !== ""
+      );
     }
   },
 
@@ -143,12 +158,37 @@ export default {
       });
   },
   methods: {
+    hour: function(text) {
+      return text.split(" ")[1];
+    },
     showTurnsListModal(store) {
       this.storeModal = store;
       this.showTurnsModal = true;
     },
     closeModal() {
       this.showTurnsModal = false;
+    },
+    selectBucket(bucket) {
+      this.bucketsSelect = bucket;
+    },
+    getNextBuckets(store) {
+      const url =
+        urls.host +
+        urls.routes.prefix +
+        urls.routes.store +
+        "/" +
+        store.id +
+        urls.routes.bucketsNextHour;
+      console.log(url);
+      axios
+        .get(url, {})
+        .then(res => {
+          this.bucketsList = res.data;
+          console.log(this.bucketsList);
+        })
+        .catch(err => {
+          this.$swal("Failako");
+        });
     },
     normalTurn(store) {
       const url =
@@ -158,27 +198,30 @@ export default {
         "/" +
         store.id +
         urls.routes.turn;
-
-      axios
-        .post(url,{
-            token: (this.hasToken ? this.$route.query.token : '')
-        })
-        .then(res => {
-          this.tiquet = res.data;
-          this.tiquet.StoreName = store.name;
-          console.log(this.tiquet);
-          this.$swal({
-            type: "success",
-            title: "Turn demanat T" + res.data.turn.number,
-            showConfirmButton: false,
-            timer: 2000
+      if (this.hasToken) {
+        axios
+          .post(url, {
+            token: this.hasToken ? this.$route.query.token : ""
+          })
+          .then(res => {
+            this.tiquet = res.data;
+            this.tiquet.StoreName = store.name;
+            console.log(this.tiquet);
+            this.$swal({
+              type: "success",
+              title: "Turn demanat T" + res.data.turn.number,
+              showConfirmButton: false,
+              timer: 2000
+            });
+            console.log("Torn demanat T" + res.data.turn.number);
+            //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
+          })
+          .catch(err => {
+            this.$swal("Failako");
           });
-          console.log("Torn demanat T" + res.data.turn.number);
-          //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
-        })
-        .catch(err => {
-          this.$swal("Failako");
-        });
+      } else {
+        this.$swal("Failako Token");
+      }
     },
     hourTurn(store) {
       const url =
@@ -188,42 +231,42 @@ export default {
         "/" +
         store.id +
         urls.routes.hourTurn;
-      if (this.time) {
-        var hoursMinutes = this.time.split(":");
+      console.log(this.bucketsSelect);
 
-        var date = new Date();
-        date.setHours(hoursMinutes[0]);
-        date.setMinutes(hoursMinutes[1]);
-        console.log(date);
-        console.log(parseInt(date.getTime() / 1000));
-
-        axios
-          .post(url, {
-            hour: parseInt(date.getTime() / 1000),
-            token: (this.hasToken ? this.$route.query.token : '')
-          })
-          .then(res => {
-            this.tiquet = res.data;
-            this.tiquet.StoreName = store.name;
-            console.log(this.tiquet);
-            this.$swal({
-              type: "success",
-              title: "Turn demanat A" + res.data.turn.number,
-              showConfirmButton: false,
-              timer: 2000
+      if (this.hasToken) {
+        if (this.bucketsSelect != null) {
+          var data = new Date(this.bucketsSelect.hour_start);
+          console.log(parseInt(data.getTime() / 1000));
+          console.log(url);
+          axios
+            .post(url, {
+              hour: parseInt(data.getTime() / 1000),
+              token: this.hasToken ? this.$route.query.token : ""
+            })
+            .then(res => {
+              console.log(res.data);
+              //this.tiquet = res.data;
+              //this.tiquet.StoreName = store.name;
+              this.$swal({
+                type: "success",
+                title:
+                  "Turn demanat a " + this.hour(this.bucketsSelect.hour_start),
+                showConfirmButton: false,
+                timer: 2000
+              });
+            })
+            .catch(err => {
+              this.$swal("Failako");
             });
-            console.log("Torn demanat A" + res.data.turn.number);
-            //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
-          })
-          .catch(err => {
-            this.$swal("Failako");
-          });
+        } else {
+          this.$swal("selecciona l'hora");
+        }
       } else {
-        this.$swal("selecciona l'hora");
+        this.$swal("Failako Token");
       }
     },
     showToken() {
-      this.$swal(this.$route.query.token)
+      this.$swal(this.$route.query.token);
     }
   }
 };
@@ -246,5 +289,9 @@ hr {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.bucketSelect {
+  border: solid 3px rgb(52, 132, 236);
 }
 </style>
