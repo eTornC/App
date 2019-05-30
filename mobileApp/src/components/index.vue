@@ -7,9 +7,9 @@
 
     <div>
       <span>VIP</span>
-      <input type="checkbox" v-model="vip" name="isVip" id="">
+      <input type="checkbox" v-model="vip" name="isVip" id>
     </div>
-    <div class="row" v-if="tiquet">
+    <!--div class="row" v-if="tiquet">
       <div class="col-12 mb-2 d-flex justify-content-center">
         <div class="card" style="width: 18rem;">
           <h1 class="border-bottom text-center">TIQUET</h1>
@@ -20,21 +20,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <template v-for="store in stores">
-      <!--div :key="store.name" class="store-app my-3 mx-4">
-        <img
-          :src="urls.host + urls.routes.prefix + store.photo_path"
-          class="img-card-app .md-image"
-        >
-        <h2 class="mb-3 mt-2">{{ store.name }}</h2>
-
-        <div class="boton_Torn-app row justify-content-center">
-          <div class="mx-2">
-            <button class="btn btn-primary" @click="normalTurn(store)">Demanar Turn</button>
-          </div>
-        </div>
-      </div-->
+    </div-->
+    <template v-for="store in storesAndTiquets">
       <div class="row" :key="store.id">
         <div class="col-12 d-flex justify-content-center">
           <div class="card" style="width: 18rem;">
@@ -48,70 +35,83 @@
             </div>
           </div>
         </div>
-        <div class="col-4 mt-2">
-          <button
-            type="button"
-            class="btn btn-warning"
-            data-toggle="modal"
-            data-target="#exampleModal"
-            @click="getNextBuckets(store)"
-          >Reserva</button>
-          <!-- Modal -->
-          <div
-            class="modal fade"
-            id="exampleModal"
-            tabindex="-1"
-            role="dialog"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Selecciona la hora</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <ul class="list-group">
-                    <div v-for="(bucket,index) in bucketsList" :key="index">
-                      <li
-                        :class="{ bucketSelect: bucket ==  bucketsSelect}"
-                        class="list-group-item m-0 list-group-item-secondary"
-                        v-if="bucket.filled"
-                      >{{hour(bucket.hour_start)}}</li>
-                      <li
-                        :class="{ bucketSelect: bucket ==  bucketsSelect}"
-                        class="list-group-item m-0"
-                        v-else
-                        @click="selectBucket(bucket)"
-                      >{{hour(bucket.hour_start)}}</li>
-                    </div>
-                  </ul>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    data-dismiss="modal"
-                    @click="hourTurn(store)"
-                  >Reserva</button>
-                </div>
+
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="exampleModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Selecciona la hora</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <ul class="list-group">
+                  <div v-for="(bucket,index) in bucketsList" :key="index">
+                    <li
+                      :class="{ bucketSelect: bucket ==  bucketsSelect}"
+                      class="list-group-item m-0 list-group-item-secondary"
+                      v-if="bucket.filled"
+                    >{{hour(bucket.hour_start)}}</li>
+                    <li
+                      :class="{ bucketSelect: bucket ==  bucketsSelect}"
+                      class="list-group-item m-0"
+                      v-else
+                      @click="selectBucket(bucket)"
+                    >{{hour(bucket.hour_start)}}</li>
+                  </div>
+                </ul>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-dismiss="modal"
+                  @click="hourTurn(store)"
+                >Reserva</button>
               </div>
             </div>
           </div>
-          <!-- Modal End -->
+        </div>
+        <!-- Modal End -->
 
+        <!-- pedir turn-->
+        <div v-if="!store.tiquet" class="col-12">
+          <div class="row footer">
+            <div class="col-4 mt-2">
+              <button
+                type="button"
+                class="btn btn-warning"
+                data-toggle="modal"
+                data-target="#exampleModal"
+                @click="getNextBuckets(store)"
+              >Reserva</button>
+            </div>
+            <div class="col-4 mt-2">
+              <button v-if="vip" class="btn btn-success" @click="vipTurn(store)">Turn Vip</button>
+            </div>
+            <div class="col-4 mt-2">
+              <button class="btn btn-primary" @click="normalTurn(store)">Turn Ahora</button>
+            </div>
+          </div>
         </div>
-        <div class="col-4 mt-2">
 
-          <button v-if="vip" class="btn btn-success" @click="vipTurn(store)">Turn Vip</button>
+        <!-- mostrar tiquet-->
+        <div v-else class="col-12">
+          <div class="row footer">
+            <div class="col-12 p-2">{{turnLeter(store.tiquet)}}</div>
+          </div>
         </div>
-        <div class="col-4 mt-2">
-          <button class="btn btn-primary" @click="normalTurn(store)">Turn Ahora</button>
-        </div>
+
         <div class="col-12">
           <hr>
         </div>
@@ -141,10 +141,11 @@ export default {
       urls: urls,
       showTurnsModal: false,
       storeModal: {},
-      tiquet: null,
+      tiquets: null,
       bucketsList: null,
       bucketsSelect: null,
-      vip:false
+      vip: false,
+      storesAndTiquets: null
     };
   },
 
@@ -158,18 +159,49 @@ export default {
   },
 
   mounted() {
-    const url = urls.host + urls.routes.prefix + urls.routes.stores;
-    axios
-      .get(url)
-      .then(res => {
-        this.stores = res.data;
-        console.log(this.stores);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    this.getTiquetOfToken();
   },
   methods: {
+    getStores() {
+      const url = urls.host + urls.routes.prefix + urls.routes.stores;
+      axios
+        .get(url)
+        .then(res => {
+          this.stores = res.data;
+
+          this.stores.forEach(store => {
+            this.tiquets.forEach(tiquet => {
+              if (store.name == tiquet.name) {
+                store.tiquet = tiquet;
+              }
+            });
+          });
+          this.storesAndTiquets = this.stores;
+          console.log(this.stores);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    getTiquetOfToken() {
+      const url = urls.host + urls.routes.prefix + urls.routes.tokenTurns;
+      console.log(url);
+      console.log(this.$route.query.token);
+
+      axios
+        .post(url, {
+          token: this.hasToken ? this.$route.query.token : ""
+        })
+        .then(res => {
+          console.log(res.data);
+          this.tiquets = res.data;
+          this.getStores();
+          //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
+        })
+        .catch(err => {
+          this.$swal("Failako");
+        });
+    },
     hour: function(text) {
       return text.split(" ")[1];
     },
@@ -223,6 +255,8 @@ export default {
               showConfirmButton: false,
               timer: 1500
             });
+            this.getTiquetOfToken();
+
             console.log("Torn demanat T" + res.data.turn.number);
             //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
           })
@@ -241,24 +275,27 @@ export default {
         "/" +
         store.id +
         urls.routes.vipTurn;
-        console.log(url)
+      console.log(url);
       if (this.hasToken) {
         axios
           .post(url, {
             token: this.hasToken ? this.$route.query.token : ""
           })
           .then(res => {
-              this.$swal({
+            console.log(res);
+            this.getTiquetOfToken();
+
+            /*  this.$swal({
               type: "success",
               title: "Turn demanat V" + res.data.turn.number,
               showConfirmButton: false,
               timer: 1500
             });
-            console.log("Torn demanat V" + res.data.turn.number);
+            console.log("Torn demanat V" + res.data.turn.number);*/
             //this.$swal('Imprimir tiquet' + JSON.stringify(res.data));
           })
           .catch(err => {
-            console.log(err)
+            console.log(err);
             this.$swal("Failako");
           });
       } else {
@@ -296,6 +333,7 @@ export default {
                 showConfirmButton: false,
                 timer: 2000
               });
+              this.getTiquetOfToken();
             })
             .catch(err => {
               this.$swal("Failako");
@@ -309,6 +347,28 @@ export default {
     },
     showToken() {
       this.$swal(this.$route.query.token);
+    },
+    turnLeter: function(turn) {
+      if (turn.number != null) {
+        if (turn.number.toString().length == 1) {
+          turn.number = "0" + turn.number.toString();
+        }
+      }
+      switch (turn.type) {
+        case "normal":
+          return "T" + turn.number;
+          break;
+        case "hour":
+          if (turn.number) {
+            return "A" + turn.number;
+          } else {
+            return "unsing";
+          }
+          break;
+        case "vip":
+          return "V" + turn.number;
+          break;
+      }
     }
   }
 };
@@ -336,7 +396,7 @@ hr {
 .bucketSelect {
   border: solid 3px rgb(52, 132, 236);
 }
-li{
+li {
   box-sizing: border-box;
 }
 </style>

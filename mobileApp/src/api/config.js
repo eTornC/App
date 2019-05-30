@@ -27,7 +27,8 @@ export default {
        turn:'/turn',
        vipTurn:'/vipTurn',
        hourTurn:'/hourTurn',
-       bucketsNextHour:'/bucketsNextHour'
+       bucketsNextHour:'/bucketsNextHour',
+       tokenTurns:'/tokenTurns'
 
      },
    }
