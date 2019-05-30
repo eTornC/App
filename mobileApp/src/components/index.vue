@@ -362,7 +362,7 @@ export default {
           if (turn.number) {
             return "A" + turn.number;
           } else {
-            return "unsing";
+            return "Reservat a les "+turn.hour_start.split(" ")[1];
           }
           break;
         case "vip":
